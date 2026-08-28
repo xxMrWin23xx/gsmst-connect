@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Plus, ListChecks, LogOut, User } from "lucide-react";
+import { Home, Plus, ListChecks, LogOut, User, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { LOGO_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ const navItems = [
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,6 +41,15 @@ export default function Layout({ children }) {
               <User className="h-4 w-4" />
               <span className="max-w-[140px] truncate">{user?.full_name || user?.email || "Staff"}</span>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9 rounded-full"
+              aria-label="Toggle dark mode"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout} className="h-9 w-9 rounded-full">
               <LogOut className="h-4 w-4" />
             </Button>

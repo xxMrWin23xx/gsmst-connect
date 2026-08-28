@@ -1,20 +1,28 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Search, SlidersHorizontal, Inbox, Loader2 } from "lucide-react";
+import { Plus, Search, Inbox, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import Layout from "@/components/Layout";
 import TicketCard from "@/components/TicketCard";
+import FilterPanel from "@/components/FilterPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES, STATUSES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+
+const defaultFilters = {
+  _open: false,
+  category: "All",
+  status: "All",
+  priority: "All",
+  building: "All",
+  location: "",
+};
 
 export default function Home() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [filters, setFilters] = useState(defaultFilters);
 
   const loadTickets = async () => {
     try {
@@ -29,16 +37,29 @@ export default function Home() {
 
   useEffect(() => {
     loadTickets();
-    const unsub = base44.entities.Ticket.subscribe((event) => {
-      loadTickets();
-    });
+    const unsub = base44.entities.Ticket.subscribe(() => loadTickets());
     return unsub;
   }, []);
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.category !== "All") count++;
+    if (filters.status !== "All") count++;
+    if (filters.priority !== "All") count++;
+    if (filters.building !== "All") count++;
+    if (filters.location.trim()) count++;
+    return count;
+  }, [filters]);
+
   const filtered = useMemo(() => {
     return tickets.filter((t) => {
-      if (categoryFilter !== "All" && t.category !== categoryFilter) return false;
-      if (statusFilter !== "All" && t.status !== statusFilter) return false;
+      if (filters.category !== "All" && t.category !== filters.category) return false;
+      if (filters.status !== "All" && t.status !== filters.status) return false;
+      if (filters.priority !== "All" && t.priority !== filters.priority) return false;
+      if (filters.building !== "All" && t.building !== filters.building) return false;
+      if (filters.location.trim()) {
+        if (!t.location_detail?.toLowerCase().includes(filters.location.trim().toLowerCase())) return false;
+      }
       if (search) {
         const q = search.toLowerCase();
         return (
@@ -50,7 +71,7 @@ export default function Home() {
       }
       return true;
     });
-  }, [tickets, search, categoryFilter, statusFilter]);
+  }, [tickets, search, filters]);
 
   const stats = useMemo(() => ({
     total: tickets.length,
@@ -59,20 +80,22 @@ export default function Home() {
     resolved: tickets.filter((t) => t.status === "Resolved").length,
   }), [tickets]);
 
+  const resetFilters = () => setFilters({ ...defaultFilters, _open: filters._open });
+
   return (
     <Layout>
       {/* Hero header */}
       <div className="mb-6">
-        <div className="gsmst-gradient rounded-3xl p-5 text-white relative overflow-hidden">
+        <div className="gsmst-gradient rounded-3xl p-6 text-white relative overflow-hidden">
           <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -left-4 -bottom-10 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
           <div className="relative">
-            <p className="text-white/80 text-xs font-semibold uppercase tracking-widest mb-1">Live Issue Feed</p>
-            <h1 className="text-2xl font-bold leading-tight">School Maintenance<br/>Made Simple</h1>
-            <p className="text-white/85 text-sm mt-2 mb-4">Report and track construction, maintenance, and technology issues across campus.</p>
+            <p className="text-white/80 text-xs font-bold uppercase tracking-widest mb-1.5">Live Issue Feed</p>
+            <h1 className="text-3xl font-bold leading-tight">School Maintenance<br/>Made Simple</h1>
+            <p className="text-white/85 text-[15px] mt-2.5 mb-4">Report and track construction, maintenance, and technology issues across campus.</p>
             <Link to="/new">
-              <Button className="bg-white text-primary hover:bg-white/90 font-semibold rounded-full shadow-lg">
-                <Plus className="h-4 w-4 mr-1" /> Report an Issue
+              <Button className="bg-white text-primary hover:bg-white/90 font-bold rounded-full shadow-lg h-11 px-5">
+                <Plus className="h-5 w-5 mr-1.5" /> Report an Issue
               </Button>
             </Link>
           </div>
@@ -83,58 +106,49 @@ export default function Home() {
       <div className="grid grid-cols-4 gap-2.5 mb-5">
         {[
           { label: "Total", value: stats.total, color: "text-foreground" },
-          { label: "Open", value: stats.open, color: "text-emerald-600" },
-          { label: "Active", value: stats.inProgress, color: "text-amber-600" },
-          { label: "Done", value: stats.resolved, color: "text-slate-500" },
+          { label: "Open", value: stats.open, color: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Active", value: stats.inProgress, color: "text-amber-600 dark:text-amber-400" },
+          { label: "Done", value: stats.resolved, color: "text-slate-500 dark:text-slate-400" },
         ].map((s) => (
-          <div key={s.label} className="glass-card rounded-2xl p-3 text-center">
-            <div className={cn("text-xl font-bold", s.color)}>{s.value}</div>
-            <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">{s.label}</div>
+          <div key={s.label} className="glass-card rounded-2xl p-3.5 text-center">
+            <div className={cn("text-2xl font-bold", s.color)}>{s.value}</div>
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold mt-0.5">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Search */}
       <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search issues, locations..."
-          className="pl-9 rounded-full bg-muted/50 border-border"
+          className="pl-11 h-12 rounded-2xl bg-muted/50 border-border text-base"
         />
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-2 mb-2">
-        <SlidersHorizontal className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-          <FilterChip label="All" active={categoryFilter === "All"} onClick={() => setCategoryFilter("All")} />
-          {CATEGORIES.map((c) => (
-            <FilterChip key={c.value} label={c.label} active={categoryFilter === c.value} onClick={() => setCategoryFilter(c.value)} />
-          ))}
-        </div>
-      </div>
-      <div className="flex items-center gap-2 mb-5">
-        <div className="w-4 flex-shrink-0" />
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-          <FilterChip label="All Status" active={statusFilter === "All"} onClick={() => setStatusFilter("All")} />
-          {STATUSES.map((s) => (
-            <FilterChip key={s.value} label={s.label} active={statusFilter === s.value} onClick={() => setStatusFilter(s.value)} />
-          ))}
-        </div>
+      {/* Filter panel */}
+      <div className="mb-5">
+        <FilterPanel
+          open={filters._open}
+          filters={filters}
+          setFilters={setFilters}
+          onReset={resetFilters}
+          activeCount={activeFilterCount}
+        />
       </div>
 
       {/* List */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="h-7 w-7 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Inbox className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground font-medium">No issues found</p>
-          <p className="text-sm text-muted-foreground/70">Try adjusting filters or report a new issue.</p>
+          <Inbox className="h-14 w-14 text-muted-foreground/40 mx-auto mb-3" />
+          <p className="text-muted-foreground font-bold text-lg">No issues found</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">Try adjusting filters or report a new issue.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -144,21 +158,5 @@ export default function Home() {
         </div>
       )}
     </Layout>
-  );
-}
-
-function FilterChip({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all",
-        active
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-card text-muted-foreground border-border hover:border-primary/40"
-      )}
-    >
-      {label}
-    </button>
   );
 }

@@ -19,15 +19,20 @@ export const PRIORITIES = [
 
 export const BUILDINGS = [
   "Main Building",
-  "Science Wing",
-  "Engineering Wing",
   "Tech Lab",
   "Gymnasium",
-  "Cafeteria",
+  "Cafe",
   "Media Center",
   "Auditorium",
   "Outdoor Campus",
   "Parking Lot",
+  "Tower: Ground Level",
+  "Tower: Main Level",
+  "Tower: 2nd Floor",
+  "Tower: 3rd Floor",
+  "Tower: 4th Floor",
+  "West Wing",
+  "Wild West Wing",
   "Other",
 ];
 
