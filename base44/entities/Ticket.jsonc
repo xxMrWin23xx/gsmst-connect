@@ -50,15 +50,20 @@
       "title": "Building",
       "enum": [
         "Main Building",
-        "Science Wing",
-        "Engineering Wing",
         "Tech Lab",
         "Gymnasium",
-        "Cafeteria",
+        "Cafe",
         "Media Center",
         "Auditorium",
         "Outdoor Campus",
         "Parking Lot",
+        "Tower: Ground Level",
+        "Tower: Main Level",
+        "Tower: 2nd Floor",
+        "Tower: 3rd Floor",
+        "Tower: 4th Floor",
+        "West Wing",
+        "Wild West Wing",
         "Other"
       ]
     },
@@ -96,29 +101,7 @@
   "rls": {
     "read": true,
     "create": true,
-    "update": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    }
+    "update": true,
+    "delete": true
   }
 }

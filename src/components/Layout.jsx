@@ -1,7 +1,6 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Plus, ListChecks, LogOut, User, Sun, Moon } from "lucide-react";
-import { useAuth } from "@/lib/AuthContext";
+import { Link, useLocation } from "react-router-dom";
+import { Home, Plus, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { LOGO_URL } from "@/lib/constants";
@@ -10,19 +9,11 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { to: "/", label: "Feed", icon: Home },
   { to: "/new", label: "Report", icon: Plus },
-  { to: "/my-tickets", label: "Mine", icon: ListChecks },
 ];
 
 export default function Layout({ children }) {
-  const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -36,24 +27,15 @@ export default function Layout({ children }) {
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Issue Reporting</div>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground pr-2">
-              <User className="h-4 w-4" />
-              <span className="max-w-[140px] truncate">{user?.full_name || user?.email || "Staff"}</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="h-9 w-9 rounded-full"
-              aria-label="Toggle dark mode"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-9 w-9 rounded-full">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="h-9 w-9 rounded-full"
+            aria-label="Toggle dark mode"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
         </div>
       </header>
 
@@ -73,7 +55,7 @@ export default function Layout({ children }) {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 px-4 py-1.5 rounded-2xl transition-all",
+                  "flex flex-col items-center justify-center gap-0.5 px-6 py-1.5 rounded-2xl transition-all",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >

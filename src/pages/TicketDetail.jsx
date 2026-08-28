@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, MapPin, Clock, Trash2, CheckCircle2, Loader2, User, AlertTriangle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useAuth } from "@/lib/AuthContext";
 import Layout from "@/components/Layout";
 import { CategoryBadge, StatusBadge, PriorityBadge } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import { cn } from "@/lib/utils";
 export default function TicketDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -48,14 +46,11 @@ export default function TicketDetail() {
     return unsub;
   }, [id]);
 
-  const canManage = ticket && (ticket.created_by_id === user?.id || user?.role === "admin");
-
   const updateStatus = async (status) => {
     setUpdating(true);
     try {
       const updates = { status };
       if (status === "Resolved") {
-        updates.resolved_by_id = user?.id;
         updates.resolved_date = new Date().toISOString();
       }
       await base44.entities.Ticket.update(ticket.id, updates);
@@ -175,8 +170,7 @@ export default function TicketDetail() {
           ))}
         </div>
 
-        {canManage && (
-          <AlertDialog>
+        <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="w-full rounded-xl h-11 text-destructive border-destructive/30 hover:bg-destructive/5 mt-3">
                 <Trash2 className="h-4 w-4 mr-2" /> Remove Ticket
@@ -197,7 +191,6 @@ export default function TicketDetail() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        )}
       </div>
     </Layout>
   );
