@@ -30,7 +30,7 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
+        <Router basename="/gsmst-connect">
           <ScrollToTop />
           <AuthenticatedApp />
         </Router>
