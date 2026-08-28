@@ -1,0 +1,124 @@
+{
+  "name": "Ticket",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title",
+      "description": "Short summary of the issue",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "description": "Detailed description of the issue"
+    },
+    "category": {
+      "type": "string",
+      "title": "Category",
+      "enum": [
+        "Construction",
+        "Maintenance",
+        "Technology"
+      ],
+      "default": "Maintenance"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Open",
+        "In Progress",
+        "Resolved"
+      ],
+      "default": "Open"
+    },
+    "priority": {
+      "type": "string",
+      "title": "Priority",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Urgent"
+      ],
+      "default": "Medium"
+    },
+    "building": {
+      "type": "string",
+      "title": "Building",
+      "enum": [
+        "Main Building",
+        "Science Wing",
+        "Engineering Wing",
+        "Tech Lab",
+        "Gymnasium",
+        "Cafeteria",
+        "Media Center",
+        "Auditorium",
+        "Outdoor Campus",
+        "Parking Lot",
+        "Other"
+      ]
+    },
+    "location_detail": {
+      "type": "string",
+      "title": "Location Detail",
+      "description": "Room number or specific area"
+    },
+    "photos": {
+      "type": "array",
+      "title": "Photos",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "default": []
+    },
+    "resolved_by_id": {
+      "type": "string",
+      "title": "Resolved By",
+      "description": "User who marked the ticket resolved"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Resolved Date"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "category",
+    "building"
+  ],
+  "rls": {
+    "read": true,
+    "create": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
